@@ -1,0 +1,68 @@
+FINAL PROJECT:
+MONGODB
+
+mongoimport -u root -p your_password --authenticationDatabase admin --db entertainment --collection movies --file file_path/movies.json
+
+db.movies.aggregate([
+  {
+    $group: {
+      _id: "$year",
+      moviecount: { $sum: 1 }
+    }
+  },
+  {
+    $sort: { moviecount: -1 }
+  },
+  {
+    $limit: 1
+  }
+])
+
+
+db.movies.countDocuments({ year: { $gt: 1999 } })
+
+
+db.movies.aggregate([
+  {
+    $match: { year: 2007 }
+  },
+  {
+    $group: {
+      _id: "$year",
+      averageVotes: { $avg: "$Votes" }
+    }
+  }
+])
+
+
+mongoexport -u root -p your_password --authenticationDatabase admin --db entertainment --collection movies --out /home/project/partial_data.csv --type=csv --fields _id,year,rating,director
+
+
+FINAL PROJECT:
+CASSANDRA
+
+CREATE KEYSPACE entertainment
+WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};
+
+describe keyspaces
+
+use entertainment;
+CREATE TABLE movies(
+id text PRIMARY KEY,
+title text,
+year text,
+rating text,
+director text
+);
+
+
+use entertainment;
+COPY entertainment.movies(id,title,year,rating,director) FROM 'file_path/partial_data.csv' WITH DELIMITER=',' AND HEADER=TRUE;
+
+describe movies
+
+
+CREATE INDEX IF NOT EXISTS idx_rating
+ON entertainment.movies ( rating ); 
+
+SELECT COUNT(*) FROM movies where rating='G';
